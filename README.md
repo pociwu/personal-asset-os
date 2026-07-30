@@ -4,7 +4,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 
 ## 目前狀態
 
-目前處於 **規格凍結與 Phase 0 治理文件階段**。產品程式碼、Compose、部署腳本及操作指令尚未建立；本 README 不提供尚未實作或未驗收的假指令。
+目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、Compose及健康檢查已有候選；Web、正式 secrets、備份與 OCI ARM64 Phase Gate仍未完成。
 
 當前工作狀態見 [TASKS.md](TASKS.md)，系統契約見 [SYSTEM_SPEC.md](docs/governance/SYSTEM_SPEC.md)。
 
@@ -41,9 +41,9 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 - 不提供自動下單、轉帳或券商密碼保存。
 - 正式部署必須經 Owner 批准並追溯至已驗收 commit SHA。
 
-## Backend 開發候選
+## Backend 與 Compose 開發候選
 
-P0-002 已提供最小 Backend骨架與 liveness候選。安裝 `uv` 後可執行：
+安裝 `uv` 後可執行 Backend測試：
 
 ```bash
 cd backend
@@ -58,7 +58,23 @@ Liveness：
 GET http://127.0.0.1:8000/api/v1/health
 ```
 
-目前尚未實作 PostgreSQL、Redis、Compose或 readiness；不得把本機 Backend候選描述為 Phase 0完成。
+P0-003 Compose候選位於`deploy/compose.yaml`。在未追蹤的`.env`中填入開發用的`POSTGRES_PASSWORD`與`REDIS_PASSWORD`後，可於已安裝 Docker Compose v2的環境執行：
+
+```bash
+docker compose --env-file .env -f deploy/compose.yaml config
+docker compose --env-file .env -f deploy/compose.yaml up -d --build
+docker compose --env-file .env -f deploy/compose.yaml ps
+```
+
+Readiness：
+
+```text
+GET /api/v1/health/ready
+200: PostgreSQL與Redis均可用
+503: 任一依賴不可用
+```
+
+P0-003不公開任何主機連接埠；HTTP驗證目前應從 Compose內部執行。正式部署會在 P0-004由唯一 Web入口代理，P0-005則把開發用`.env`密碼輸入替換為唯讀 secret files。不得把目前候選描述為 Phase 0完成。
 
 ## 公開 Repository 安全
 
