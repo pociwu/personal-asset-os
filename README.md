@@ -4,7 +4,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 
 ## 目前狀態
 
-目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、React／Nginx Web、Compose、健康檢查及secret files邊界已有候選；備份與 OCI ARM64 Phase Gate仍未完成。
+目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、React／Nginx Web、Compose、健康檢查、secret files及加密備份／隔離還原底座已有候選；Ubuntu整合驗收與 OCI ARM64 Phase Gate仍未完成。
 
 當前工作狀態見 [TASKS.md](TASKS.md)，系統契約見 [SYSTEM_SPEC.md](docs/governance/SYSTEM_SPEC.md)。
 
@@ -18,6 +18,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 - [Codex 工作規則](docs/governance/CODEX_MASTER_PROMPT.md)
 - [安全政策](SECURITY.md)
 - [Secret files操作指南](docs/deployment/SECRETS.md)
+- [備份與隔離還原指南](docs/deployment/BACKUP_RESTORE.md)
 - [決策紀錄](docs/governance/DECISIONS.md)
 - [架構決策](docs/adr/)
 
@@ -97,6 +98,10 @@ python scripts/verify/quality.py
 ```
 
 此唯一入口會以鎖檔同步Backend與Frontend依賴，依序執行Ruff lint／format、mypy strict、pytest、ESLint、Prettier、TypeScript、Vitest及production build。任一步驟失敗即以非零狀態停止；GitHub Actions整合留在P0-008。
+
+## 加密備份候選
+
+Phase 0備份底座只處理PostgreSQL；Redis是可重建的session／cache。建立備份時，custom-format dump直接串流至`age`，不在主機寫入明文dump。解密私鑰由Owner於驗證或隔離還原演練時暫時提供，詳細前置條件與指令見[備份與隔離還原指南](docs/deployment/BACKUP_RESTORE.md)。
 
 ## 公開 Repository 安全
 

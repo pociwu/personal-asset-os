@@ -34,7 +34,7 @@
 | P0-004 | IN_REVIEW | React build stage與單一 Nginx Web 映像 | P0-003 |
 | P0-005 | IN_REVIEW | Secrets與正式設定邊界 | P0-003 |
 | P0-006 | IN_REVIEW | 品質與測試指令 | P0-002、P0-004 |
-| P0-007 | BACKLOG | 手動備份、加密、驗證與隔離還原 | P0-003、P0-005 |
+| P0-007 | IN_REVIEW | 手動備份、加密、驗證與隔離還原 | P0-003、P0-005 |
 | P0-008 | BACKLOG | GitHub CI與安全掃描 | P0-006 |
 | P0-009 | BACKLOG | OCI帳號、Tailscale與受限 wrapper | P0-005、P0-007、P0-008 |
 | P0-010 | BACKLOG | OCI ARM64 Phase Gate | P0-002～P0-009 |
@@ -104,6 +104,19 @@
   - Frontend：ESLint、Prettier、TypeScript通過、2 tests passed、production build成功
   - `uv.lock`與`package-lock.json`：同步成功
   - npm audit：0 vulnerabilities
+- Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
+
+### P0-007 候選證據
+
+- Branch：`codex/p0-007-backup-restore`
+- Base：P0-006堆疊候選；上游通過驗收前不得獨立合併至`main`。
+- Includes：PostgreSQL custom-format dump直接串流至`age`、SHA-256驗證、嚴格artifact命名、操作鎖、磁碟容量防護、離線archive驗證及無網路／tmpfs的一次性PostgreSQL隔離還原。
+- Excludes：Redis備份、排程、OCI Object Storage上傳、保留政策自動化、正式資料及長期存放解密私鑰。
+- Verification：
+  - `python scripts/verify/quality.py`：11/11 checks passed；Backend 24 tests及Frontend 2 tests通過
+  - Backup腳本Bash語法檢查：4個檔案通過
+  - 明文dump、Redis、`latest`及正式volume靜態防護測試：4項
+  - 實際加密備份及隔離還原：本機未安裝Docker及`age`，納入P0-008 Ubuntu整合驗收
 - Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP
