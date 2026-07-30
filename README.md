@@ -19,6 +19,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 - [安全政策](SECURITY.md)
 - [Secret files操作指南](docs/deployment/SECRETS.md)
 - [備份與隔離還原指南](docs/deployment/BACKUP_RESTORE.md)
+- [GitHub CI](.github/workflows/ci.yml)
 - [決策紀錄](docs/governance/DECISIONS.md)
 - [架構決策](docs/adr/)
 
@@ -97,7 +98,9 @@ npm run build
 python scripts/verify/quality.py
 ```
 
-此唯一入口會以鎖檔同步Backend與Frontend依賴，依序執行Ruff lint／format、mypy strict、pytest、ESLint、Prettier、TypeScript、Vitest及production build。任一步驟失敗即以非零狀態停止；GitHub Actions整合留在P0-008。
+此唯一入口會以鎖檔同步Backend與Frontend依賴，依序執行Ruff lint／format、mypy strict、pytest、ESLint、Prettier、TypeScript、Vitest及production build。任一步驟失敗即以非零狀態停止；GitHub Actions會呼叫同一入口。
+
+GitHub CI候選另在Ubuntu 24.04執行依賴稽核、Git history secret scan、filesystem／映像掃描，以及使用合成secret與獨立volume的Compose故障恢復、加密備份及隔離還原。CI測試清理volume只限一次性Compose project，絕不指向正式project。
 
 ## 加密備份候選
 

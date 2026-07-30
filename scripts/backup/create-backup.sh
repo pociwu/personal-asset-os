@@ -26,7 +26,7 @@ trap cleanup EXIT
 
 [[ ! -e "$artifact_path" ]] || fail "backup artifact already exists"
 
-docker compose --file "$COMPOSE_FILE" exec --no-TTY --user postgres postgres \
+run_compose exec --no-TTY --user postgres postgres \
     pg_dump \
     --format=custom \
     --no-owner \

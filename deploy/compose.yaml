@@ -2,6 +2,7 @@ name: personal-asset-os
 
 services:
   web:
+    image: personal-asset-os/web:${PAOS_IMAGE_TAG:-candidate}
     build:
       context: ..
       dockerfile: deploy/nginx/Dockerfile
@@ -20,12 +21,14 @@ services:
       retries: 5
       start_period: 5s
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:${PAOS_WEB_PORT:-8080}:8080"
     restart: unless-stopped
     networks:
+      - edge
       - internal
 
   backend:
+    image: personal-asset-os/backend:${PAOS_IMAGE_TAG:-candidate}
     build:
       context: ../backend
       dockerfile: Dockerfile
@@ -89,6 +92,7 @@ services:
 
   redis:
     image: redis:7.4.10-bookworm
+    user: redis
     command:
       - sh
       - -euc
@@ -99,8 +103,7 @@ services:
         umask 077
         printf 'user default on >%s ~* &* +@all\n' "$$secret" > /run/redis-auth/users.acl
         unset secret
-        chown redis:redis /run/redis-auth /run/redis-auth/users.acl
-        exec gosu redis redis-server --aclfile /run/redis-auth/users.acl
+        exec redis-server --aclfile /run/redis-auth/users.acl
     healthcheck:
       test:
         - CMD-SHELL
@@ -113,11 +116,12 @@ services:
     secrets:
       - redis_password
     tmpfs:
-      - /run/redis-auth:mode=0700,uid=0,gid=0,size=64k
+      - /run/redis-auth:mode=0700,uid=999,gid=999,size=64k
     networks:
       - internal
 
 networks:
+  edge:
   internal:
     internal: true
 

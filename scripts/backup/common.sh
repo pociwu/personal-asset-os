@@ -10,6 +10,14 @@ POSTGRES_IMAGE="postgres:16.14-bookworm"
 DATABASE_NAME="personal_asset_os"
 DATABASE_USER="personal_asset_os"
 
+run_compose() {
+    local compose_arguments=(--file "$COMPOSE_FILE")
+    if [[ -n "${PAOS_COMPOSE_PROJECT_NAME:-}" ]]; then
+        compose_arguments+=(--project-name "$PAOS_COMPOSE_PROJECT_NAME")
+    fi
+    docker compose "${compose_arguments[@]}" "$@"
+}
+
 fail() {
     printf '%s\n' "backup operation failed: $1" >&2
     exit 1
