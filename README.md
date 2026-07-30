@@ -41,6 +41,25 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 - 不提供自動下單、轉帳或券商密碼保存。
 - 正式部署必須經 Owner 批准並追溯至已驗收 commit SHA。
 
+## Backend 開發候選
+
+P0-002 已提供最小 Backend骨架與 liveness候選。安裝 `uv` 後可執行：
+
+```bash
+cd backend
+uv sync --locked
+uv run --locked pytest
+uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+Liveness：
+
+```text
+GET http://127.0.0.1:8000/api/v1/health
+```
+
+目前尚未實作 PostgreSQL、Redis、Compose或 readiness；不得把本機 Backend候選描述為 Phase 0完成。
+
 ## 公開 Repository 安全
 
 禁止提交 `.env`、secret file、資料庫 dump、真實帳戶／持股、OCI OCID、Tailscale 識別資訊、正式 Log、audit log、Playwright trace或含真實資料的截圖。安全問題請依 [SECURITY.md](SECURITY.md) 私下通報。

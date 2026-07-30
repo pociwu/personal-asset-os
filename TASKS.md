@@ -29,7 +29,7 @@
 
 | Task ID | 狀態 | 任務 | 依賴 |
 |---|---|---|---|
-| P0-002 | READY | Backend 最小骨架與 liveness | P0-001 |
+| P0-002 | IN_REVIEW | Backend 最小骨架與 liveness | P0-001 |
 | P0-003 | BACKLOG | PostgreSQL、Redis、Compose及 readiness | P0-002 |
 | P0-004 | BACKLOG | React build stage與單一 Nginx Web 映像 | P0-003 |
 | P0-005 | BACKLOG | Secrets與正式設定邊界 | P0-003 |
@@ -38,6 +38,17 @@
 | P0-008 | BACKLOG | GitHub CI與安全掃描 | P0-006 |
 | P0-009 | BACKLOG | OCI帳號、Tailscale與受限 wrapper | P0-005、P0-007、P0-008 |
 | P0-010 | BACKLOG | OCI ARM64 Phase Gate | P0-002～P0-009 |
+
+### P0-002 候選證據
+
+- Branch：`codex/p0-002-backend-skeleton`
+- Includes：FastAPI application、非敏感設定、request ID、結構化 JSON request Log、`GET /api/v1/health`、鎖檔與外部行為測試。
+- Excludes：Compose、PostgreSQL、Redis、readiness、正式 secrets、登入及任何財務領域功能。
+- Verification：
+  - `uv sync --locked`：成功
+  - `uv run --locked pytest`：候選提交前重新執行
+  - Uvicorn HTTP smoke：`200`、`{"status":"ok","service":"backend"}`、有效 `X-Request-ID`、`Cache-Control: no-store`
+- Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP
 
