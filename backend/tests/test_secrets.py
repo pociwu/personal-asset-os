@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from app.core.config import Settings
 from app.core.secrets import SecretConfigurationError, load_secret_file
 from app.main import create_app

@@ -63,13 +63,7 @@ export function App() {
   );
 }
 
-function StatusItem({
-  label,
-  state
-}: {
-  label: string;
-  state: ServiceState;
-}) {
+function StatusItem({ label, state }: { label: string; state: ServiceState }) {
   return (
     <div className="status-item">
       <span className={`status-dot status-dot--${state}`} aria-hidden="true" />

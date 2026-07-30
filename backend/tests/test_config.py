@@ -1,10 +1,11 @@
 from pathlib import Path
 
+import pytest
 from app.core.config import Settings
 
 
 def test_settings_load_non_sensitive_paos_environment_values(
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("PAOS_APP_NAME", "Personal Asset OS Test")
     monkeypatch.setenv("PAOS_APP_ENV", "test")
@@ -23,9 +24,7 @@ def test_settings_load_non_sensitive_paos_environment_values(
     assert settings.app_name == "Personal Asset OS Test"
     assert settings.app_env == "test"
     assert settings.log_level == "warning"
-    assert settings.postgres_password_file == Path(
-        "/run/secrets/postgres_password"
-    )
+    assert settings.postgres_password_file == Path("/run/secrets/postgres_password")
     assert settings.redis_password_file == Path("/run/secrets/redis_password")
     assert not hasattr(settings, "postgres_password")
     assert not hasattr(settings, "redis_password")

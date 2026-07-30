@@ -4,6 +4,8 @@ import time
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
+from starlette.middleware.base import RequestResponseEndpoint
+from starlette.responses import Response
 
 _REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9._-]{1,128}$")
 _logger = logging.getLogger("personal_asset_os.http")
@@ -11,7 +13,10 @@ _logger = logging.getLogger("personal_asset_os.http")
 
 def install_request_context(app: FastAPI) -> None:
     @app.middleware("http")
-    async def request_context(request: Request, call_next):
+    async def request_context(
+        request: Request,
+        call_next: RequestResponseEndpoint,
+    ) -> Response:
         request_id = _request_id(request.headers.get("X-Request-ID"))
         request.state.request_id = request_id
         started_at = time.perf_counter()
