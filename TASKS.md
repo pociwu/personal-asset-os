@@ -31,7 +31,7 @@
 |---|---|---|---|
 | P0-002 | DONE | Backend 最小骨架與 liveness | P0-001 |
 | P0-003 | IN_REVIEW | PostgreSQL、Redis、Compose及 readiness | P0-002 |
-| P0-004 | BACKLOG | React build stage與單一 Nginx Web 映像 | P0-003 |
+| P0-004 | IN_REVIEW | React build stage與單一 Nginx Web 映像 | P0-003 |
 | P0-005 | BACKLOG | Secrets與正式設定邊界 | P0-003 |
 | P0-006 | BACKLOG | 品質與測試指令 | P0-002、P0-004 |
 | P0-007 | BACKLOG | 手動備份、加密、驗證與隔離還原 | P0-003、P0-005 |
@@ -60,6 +60,21 @@
   - `uv run --locked pytest`：9 passed
   - Python compile與 Compose靜態斷言：成功
   - Docker Compose啟動與故障恢復：本機未安裝 Docker，待具備 Docker的驗收環境執行
+- Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
+
+### P0-004 候選證據
+
+- Branch：`codex/p0-004-web-image`
+- Base：P0-003候選分支；P0-003通過驗收前不得獨立合併至`main`。
+- Includes：React／TypeScript／Vite首頁、服務狀態顯示、npm鎖檔、Node build stage、單一 Nginx runtime、SPA fallback、`/api`代理、安全標頭、Web healthcheck及唯一 loopback Port。
+- Excludes：登入、財務功能、Tailscale主機設定、正式 secret files、CI及 OCI ARM64實機驗收。
+- Verification：
+  - `npm install`：0 vulnerabilities
+  - `npm test`：2 passed
+  - `npm run build`：成功
+  - 桌面及390px手機瀏覽器渲染：成功，無水平溢位
+  - Compose與Nginx靜態斷言：候選提交前重新執行
+  - Docker映像 build與四服務啟動：本機未安裝 Docker，待具備 Docker的驗收環境執行
 - Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP

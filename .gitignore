@@ -30,6 +30,7 @@ htmlcov/
 node_modules/
 dist/
 coverage/
+*.tsbuildinfo
 
 # Test artifacts
 playwright-report/
