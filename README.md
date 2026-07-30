@@ -20,6 +20,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 - [Secret files操作指南](docs/deployment/SECRETS.md)
 - [備份與隔離還原指南](docs/deployment/BACKUP_RESTORE.md)
 - [GitHub CI](.github/workflows/ci.yml)
+- [Ubuntu ARM64測試主機指南](docs/deployment/UBUNTU_ARM64_TEST.md)
 - [決策紀錄](docs/governance/DECISIONS.md)
 - [架構決策](docs/adr/)
 

@@ -36,7 +36,7 @@
 | P0-006 | IN_REVIEW | 品質與測試指令 | P0-002、P0-004 |
 | P0-007 | IN_REVIEW | 手動備份、加密、驗證與隔離還原 | P0-003、P0-005 |
 | P0-008 | IN_REVIEW | GitHub CI與安全掃描 | P0-006 |
-| P0-009 | BACKLOG | OCI帳號、Tailscale與受限 wrapper | P0-005、P0-007、P0-008 |
+| P0-009 | IN_REVIEW | OCI帳號、Tailscale與受限 wrapper | P0-005、P0-007、P0-008 |
 | P0-010 | BACKLOG | OCI ARM64 Phase Gate | P0-002～P0-009 |
 
 ### P0-002 候選證據
@@ -133,6 +133,21 @@
   - `pip-audit`與`npm audit`：0 known vulnerabilities
   - GitHub Actions：push／PR兩組共8個jobs全部通過；Compose故障恢復、`age`加密備份、archive驗證、tmpfs隔離還原及三類Trivy掃描均成功
 - Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
+
+### P0-009 候選證據
+
+- Branch：`codex/p0-009-ubuntu-guardrails`
+- Base：P0-008堆疊候選；上游通過驗收前不得獨立合併至`main`。
+- Includes：Ubuntu 24.04 ARM64資源／帳號preflight、Owner操作指南、Tailscale Serve私人入口、AI-PM單一sudo命令、只接受完整SHA的root-owned驗證wrapper、Compose隔離policy及原生ARM64映像證據。
+- Excludes：建立OCI資源、寫入真實OCID／IP／tailnet資料、正式部署、自動migration、Agent Docker權限及P0-010實機Phase Gate。
+- Verification：
+  - Compose policy接受固定四服務隔離形狀，拒絕host mount與公網Port
+  - Wrapper不執行候選Shell、不接受任意路徑／Port／volume／secret參數
+  - Tailscale設定先關閉Funnel，只轉送loopback Web
+  - `python scripts/verify/quality.py`：11/11 checks passed；Backend 34 tests及Frontend 2 tests通過
+  - 3個部署Bash腳本、Compose policy Python語法及Ruff：通過
+  - GitHub Ubuntu CI及實際ARM64 wrapper：推送候選及P0-010主機驗收時執行
+- Commit SHA：候選commit建立後以Git metadata及Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP
 
