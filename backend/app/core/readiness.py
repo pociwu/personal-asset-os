@@ -9,6 +9,7 @@ from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from app.core.config import Settings
+from app.core.secrets import load_secret_file
 
 logger = logging.getLogger(__name__)
 
@@ -33,15 +34,22 @@ class ExternalServicesReadinessProbe:
     """Probe runtime dependencies without exposing connection error details."""
 
     def __init__(self, settings: Settings) -> None:
+        secrets_required = settings.app_env.casefold() == "production"
+        postgres_secret = load_secret_file(
+            settings.postgres_password_file,
+            name="postgres_password",
+            required=secrets_required,
+        )
+        redis_secret = load_secret_file(
+            settings.redis_password_file,
+            name="redis_password",
+            required=secrets_required,
+        )
         postgres_password = (
-            settings.postgres_password.get_secret_value()
-            if settings.postgres_password
-            else None
+            postgres_secret.get_secret_value() if postgres_secret else None
         )
         redis_password = (
-            settings.redis_password.get_secret_value()
-            if settings.redis_password
-            else None
+            redis_secret.get_secret_value() if redis_secret else None
         )
         postgres_url = URL.create(
             drivername="postgresql+asyncpg",
