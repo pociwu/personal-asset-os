@@ -32,7 +32,7 @@
 | P0-002 | DONE | Backend 最小骨架與 liveness | P0-001 |
 | P0-003 | IN_REVIEW | PostgreSQL、Redis、Compose及 readiness | P0-002 |
 | P0-004 | IN_REVIEW | React build stage與單一 Nginx Web 映像 | P0-003 |
-| P0-005 | BACKLOG | Secrets與正式設定邊界 | P0-003 |
+| P0-005 | IN_REVIEW | Secrets與正式設定邊界 | P0-003 |
 | P0-006 | BACKLOG | 品質與測試指令 | P0-002、P0-004 |
 | P0-007 | BACKLOG | 手動備份、加密、驗證與隔離還原 | P0-003、P0-005 |
 | P0-008 | BACKLOG | GitHub CI與安全掃描 | P0-006 |
@@ -75,6 +75,21 @@
   - 桌面及390px手機瀏覽器渲染：成功，無水平溢位
   - Compose與Nginx靜態斷言：候選提交前重新執行
   - Docker映像 build與四服務啟動：本機未安裝 Docker，待具備 Docker的驗收環境執行
+- Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
+
+### P0-005 候選證據
+
+- Branch：`codex/p0-005-secret-files`
+- Base：P0-004堆疊候選；上游通過驗收前不得獨立合併至`main`。
+- Includes：Repository外secret根目錄、Compose file-backed secrets、per-service授權、Backend production啟動驗證、Redis暫存ACL、非敏感`.env.example`、metadata-only preflight及Owner操作文件。
+- Excludes：真實secret值、自動密碼輪替、session secret消費者、備份加密設定、部署wrapper及正式部署。
+- Verification：
+  - Backend tests：20 passed
+  - Frontend tests：2 passed；production build成功
+  - Compose secret授權與無敏感environment靜態斷言：成功
+  - Secret preflight Shell語法檢查：成功
+  - 直接密碼environment掃描：無結果
+  - Docker secrets實際掛載：本機未安裝 Docker，待具備 Docker的驗收環境執行
 - Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP

@@ -4,7 +4,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 
 ## 目前狀態
 
-目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、React／Nginx Web、Compose及健康檢查已有候選；正式 secrets、備份與 OCI ARM64 Phase Gate仍未完成。
+目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、React／Nginx Web、Compose、健康檢查及secret files邊界已有候選；備份與 OCI ARM64 Phase Gate仍未完成。
 
 當前工作狀態見 [TASKS.md](TASKS.md)，系統契約見 [SYSTEM_SPEC.md](docs/governance/SYSTEM_SPEC.md)。
 
@@ -17,6 +17,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 - [正式領域術語](CONTEXT.md)
 - [Codex 工作規則](docs/governance/CODEX_MASTER_PROMPT.md)
 - [安全政策](SECURITY.md)
+- [Secret files操作指南](docs/deployment/SECRETS.md)
 - [決策紀錄](docs/governance/DECISIONS.md)
 - [架構決策](docs/adr/)
 
@@ -58,9 +59,11 @@ Liveness：
 GET http://127.0.0.1:8000/api/v1/health
 ```
 
-Compose候選位於`deploy/compose.yaml`。在未追蹤的`.env`中填入開發用的`POSTGRES_PASSWORD`與`REDIS_PASSWORD`後，可於已安裝 Docker Compose v2的環境執行：
+Compose候選位於`deploy/compose.yaml`。`.env`只允許保存`.env.example`列出的非敏感設定；PostgreSQL與Redis密碼必須依[Secret files操作指南](docs/deployment/SECRETS.md)建立於Repository外。Owner完成不讀取內容的preflight後，才可於已安裝 Docker Compose v2的環境執行：
 
 ```bash
+cp .env.example .env
+sudo scripts/verify/secrets-preflight.sh
 docker compose --env-file .env -f deploy/compose.yaml config
 docker compose --env-file .env -f deploy/compose.yaml up -d --build
 docker compose --env-file .env -f deploy/compose.yaml ps
@@ -74,7 +77,7 @@ GET /api/v1/health/ready
 503: 任一依賴不可用
 ```
 
-P0-004加入唯一 Web入口`http://127.0.0.1:8080`，並由 Nginx代理`/api`；Backend、PostgreSQL及Redis仍不發布主機 Port。P0-005會把開發用`.env`密碼輸入替換為唯讀 secret files。不得把目前候選描述為 Phase 0完成。
+唯一 Web入口為`http://127.0.0.1:8080`，並由 Nginx代理`/api`；Backend、PostgreSQL及Redis仍不發布主機 Port。Secret只以唯讀檔案授權給必要容器，不會進入`.env`或Compose environment。不得把目前候選描述為 Phase 0完成。
 
 前端可獨立驗證：
 
