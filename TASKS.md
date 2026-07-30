@@ -35,7 +35,7 @@
 | P0-005 | IN_REVIEW | Secrets與正式設定邊界 | P0-003 |
 | P0-006 | IN_REVIEW | 品質與測試指令 | P0-002、P0-004 |
 | P0-007 | IN_REVIEW | 手動備份、加密、驗證與隔離還原 | P0-003、P0-005 |
-| P0-008 | BACKLOG | GitHub CI與安全掃描 | P0-006 |
+| P0-008 | IN_REVIEW | GitHub CI與安全掃描 | P0-006 |
 | P0-009 | BACKLOG | OCI帳號、Tailscale與受限 wrapper | P0-005、P0-007、P0-008 |
 | P0-010 | BACKLOG | OCI ARM64 Phase Gate | P0-002～P0-009 |
 
@@ -117,6 +117,21 @@
   - Backup腳本Bash語法檢查：4個檔案通過
   - 明文dump、Redis、`latest`及正式volume靜態防護測試：4項
   - 實際加密備份及隔離還原：本機未安裝Docker及`age`，納入P0-008 Ubuntu整合驗收
+- Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
+
+### P0-008 候選證據
+
+- Branch：`codex/p0-008-ci-security`
+- Base：P0-007堆疊候選；上游通過驗收前不得獨立合併至`main`。
+- Includes：Ubuntu 24.04 GitHub Actions、統一品質閘門、Python／npm依賴稽核、Git history secret scan、Trivy filesystem／映像掃描、四服務Compose整合、依賴故障恢復，以及實際`age`備份／驗證／隔離還原。
+- Excludes：OCI ARM64原生驗收、Chromium E2E、正式secrets、正式volume、正式部署及自動合併。
+- Verification：
+  - 所有Action固定完整40字元commit SHA
+  - 整合測試使用合成secret、獨立Compose project、測試volume及loopback測試Port
+  - `python scripts/verify/quality.py`：Ubuntu CI 11/11 checks passed；Backend 30 tests及Frontend 2 tests通過
+  - Workflow／Dependabot YAML解析及5個Bash檔案語法檢查：通過
+  - `pip-audit`與`npm audit`：0 known vulnerabilities
+  - GitHub Actions：push／PR兩組共8個jobs全部通過；Compose故障恢復、`age`加密備份、archive驗證、tmpfs隔離還原及三類Trivy掃描均成功
 - Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP
