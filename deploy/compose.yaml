@@ -1,6 +1,30 @@
 name: personal-asset-os
 
 services:
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/nginx/Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --spider
+        - http://127.0.0.1:8080/healthz
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+    networks:
+      - internal
+
   backend:
     build:
       context: ../backend

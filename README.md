@@ -4,7 +4,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 
 ## 目前狀態
 
-目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、Compose及健康檢查已有候選；Web、正式 secrets、備份與 OCI ARM64 Phase Gate仍未完成。
+目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、React／Nginx Web、Compose及健康檢查已有候選；正式 secrets、備份與 OCI ARM64 Phase Gate仍未完成。
 
 當前工作狀態見 [TASKS.md](TASKS.md)，系統契約見 [SYSTEM_SPEC.md](docs/governance/SYSTEM_SPEC.md)。
 
@@ -58,7 +58,7 @@ Liveness：
 GET http://127.0.0.1:8000/api/v1/health
 ```
 
-P0-003 Compose候選位於`deploy/compose.yaml`。在未追蹤的`.env`中填入開發用的`POSTGRES_PASSWORD`與`REDIS_PASSWORD`後，可於已安裝 Docker Compose v2的環境執行：
+Compose候選位於`deploy/compose.yaml`。在未追蹤的`.env`中填入開發用的`POSTGRES_PASSWORD`與`REDIS_PASSWORD`後，可於已安裝 Docker Compose v2的環境執行：
 
 ```bash
 docker compose --env-file .env -f deploy/compose.yaml config
@@ -74,7 +74,16 @@ GET /api/v1/health/ready
 503: 任一依賴不可用
 ```
 
-P0-003不公開任何主機連接埠；HTTP驗證目前應從 Compose內部執行。正式部署會在 P0-004由唯一 Web入口代理，P0-005則把開發用`.env`密碼輸入替換為唯讀 secret files。不得把目前候選描述為 Phase 0完成。
+P0-004加入唯一 Web入口`http://127.0.0.1:8080`，並由 Nginx代理`/api`；Backend、PostgreSQL及Redis仍不發布主機 Port。P0-005會把開發用`.env`密碼輸入替換為唯讀 secret files。不得把目前候選描述為 Phase 0完成。
+
+前端可獨立驗證：
+
+```bash
+cd frontend
+npm ci
+npm test
+npm run build
+```
 
 ## 公開 Repository 安全
 
