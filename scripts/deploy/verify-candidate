@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+REPOSITORY=/opt/ai-pm-os/projects/personal-asset-os
+RUNS_ROOT=/var/lib/paos-verifier/runs
+POLICY=/usr/local/libexec/paos-compose-policy.py
+TEST_PORT=18080
+
+fail() {
+    printf '%s\n' "candidate verification failed: $1" >&2
+    exit 1
+}
+
+[[ "$#" -eq 1 ]] || fail "exactly one commit SHA is required"
+SHA="$1"
+[[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || fail "commit SHA must be 40 lowercase hex characters"
+[[ "$(id -u)" -eq 0 ]] || fail "wrapper must run as root"
+
+for command_name in age age-keygen curl docker flock git openssl python3 runuser; do
+    command -v "$command_name" >/dev/null 2>&1 ||
+        fail "required command is unavailable: $command_name"
+done
+[[ -x "$POLICY" ]] || fail "installed Compose policy is unavailable"
+[[ -d "$REPOSITORY/.git" ]] || fail "fixed repository path is unavailable"
+
+install -d -m 0700 -o root -g root "$RUNS_ROOT"
+exec 9>"$RUNS_ROOT/.verify.lock"
+flock -n 9 || fail "another candidate verification is running"
+
+runuser --user deploy -- git -C "$REPOSITORY" fetch --prune origin
+runuser --user deploy -- git -C "$REPOSITORY" cat-file -e "$SHA^{commit}" ||
+    fail "commit does not exist"
+runuser --user deploy -- git -C "$REPOSITORY" branch --remotes --contains "$SHA" |
+    grep -Eq 'origin/' || fail "commit is not reachable from an origin branch"
+
+RUN_ROOT="$RUNS_ROOT/$SHA"
+WORKTREE="$RUN_ROOT/repository"
+SECRETS="$RUN_ROOT/secrets"
+COMPOSE_FILE="$WORKTREE/deploy/compose.yaml"
+PROJECT_NAME="paos-verify-${SHA:0:12}"
+IMAGE_TAG="verify-${SHA:0:12}"
+
+[[ ! -e "$RUN_ROOT" ]] || fail "verification directory already exists"
+install -d -m 0700 -o deploy -g deploy "$RUN_ROOT"
+install -d -m 0700 -o root -g root "$SECRETS"
+
+compose() {
+    PAOS_SECRET_DIR="$SECRETS" \
+        PAOS_WEB_PORT="$TEST_PORT" \
+        PAOS_IMAGE_TAG="$IMAGE_TAG" \
+        docker compose \
+        --project-name "$PROJECT_NAME" \
+        --file "$COMPOSE_FILE" \
+        "$@"
+}
+
+cleanup() {
+    local exit_status=$?
+    compose down --volumes --remove-orphans >/dev/null 2>&1 || true
+    docker image rm \
+        "personal-asset-os/backend:$IMAGE_TAG" \
+        "personal-asset-os/web:$IMAGE_TAG" >/dev/null 2>&1 || true
+    runuser --user deploy -- git -C "$REPOSITORY" worktree remove --force "$WORKTREE" \
+        >/dev/null 2>&1 || true
+    rm -rf -- "$RUN_ROOT"
+    return "$exit_status"
+}
+trap cleanup EXIT
+
+runuser --user deploy -- git -C "$REPOSITORY" worktree add --detach "$WORKTREE" "$SHA"
+openssl rand -hex 32 >"$SECRETS/postgres_password"
+openssl rand -hex 32 >"$SECRETS/redis_password"
+chmod 0444 "$SECRETS/postgres_password" "$SECRETS/redis_password"
+
+compose config --format json >"$RUN_ROOT/compose.json"
+python3 "$POLICY" --candidate-root "$RUN_ROOT" <"$RUN_ROOT/compose.json"
+compose up --detach --build --wait --wait-timeout 240
+
+curl --fail --silent --show-error "http://127.0.0.1:$TEST_PORT/" >/dev/null
+curl --fail --silent --show-error \
+    "http://127.0.0.1:$TEST_PORT/api/v1/health/ready" >/dev/null
+
+compose stop postgres
+readiness_status=000
+for _ in {1..15}; do
+    readiness_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+        "http://127.0.0.1:$TEST_PORT/api/v1/health/ready" || true)"
+    [[ "$readiness_status" == "503" ]] && break
+    sleep 1
+done
+liveness_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+    "http://127.0.0.1:$TEST_PORT/api/v1/health")"
+[[ "$liveness_status" == "200" ]] || fail "liveness did not remain available"
+[[ "$readiness_status" == "503" ]] || fail "readiness did not report dependency failure"
+
+compose start postgres
+recovered=false
+for _ in {1..30}; do
+    if curl --fail --silent --show-error \
+        "http://127.0.0.1:$TEST_PORT/api/v1/health/ready" >/dev/null; then
+        recovered=true
+        break
+    fi
+    sleep 2
+done
+[[ "$recovered" == "true" ]] || fail "readiness did not recover"
+
+for service in backend web; do
+    architecture="$(docker image inspect \
+        --format '{{.Architecture}}' "personal-asset-os/$service:$IMAGE_TAG")"
+    [[ "$architecture" == "arm64" ]] || fail "$service image is not native arm64"
+    digest="$(docker image inspect \
+        --format '{{.Id}}' "personal-asset-os/$service:$IMAGE_TAG")"
+    printf '%s\n' "$service image: $digest ($architecture)"
+done
+
+printf '%s\n' "candidate verification passed: $SHA"

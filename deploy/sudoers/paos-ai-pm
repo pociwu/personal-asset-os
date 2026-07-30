@@ -1,0 +1,2 @@
+# AI-PM may request only the root-owned candidate verifier with one SHA argument.
+ai-pm ALL=(root) /usr/local/sbin/paos-verify-candidate [0-9a-f]*
