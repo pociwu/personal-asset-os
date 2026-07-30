@@ -16,7 +16,11 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 82% 18%, rgb(195 218 196 / 70%), transparent 28rem),
+    radial-gradient(
+      circle at 82% 18%,
+      rgb(195 218 196 / 70%),
+      transparent 28rem
+    ),
     linear-gradient(145deg, #f8f6ef 0%, #e6ece2 100%);
 }
 

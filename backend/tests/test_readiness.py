@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 
 import pytest
-from httpx import ASGITransport, AsyncClient
-
 from app.core.config import Settings
 from app.core.readiness import ReadinessResult
 from app.main import create_app
+from httpx import ASGITransport, AsyncClient, Response
 
 
 @pytest.fixture
@@ -65,7 +64,7 @@ async def test_readiness_returns_503_without_internal_error_details(
     assert "exception" not in response.text.lower()
 
 
-async def _get_readiness(*, postgres: bool, redis: bool):
+async def _get_readiness(*, postgres: bool, redis: bool) -> Response:
     probe = FakeReadinessProbe(ReadinessResult(postgres=postgres, redis=redis))
     app = create_app(Settings(log_level="WARNING"), readiness_probe=probe)
     async with AsyncClient(

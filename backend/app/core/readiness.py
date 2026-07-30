@@ -48,9 +48,7 @@ class ExternalServicesReadinessProbe:
         postgres_password = (
             postgres_secret.get_secret_value() if postgres_secret else None
         )
-        redis_password = (
-            redis_secret.get_secret_value() if redis_secret else None
-        )
+        redis_password = redis_secret.get_secret_value() if redis_secret else None
         postgres_url = URL.create(
             drivername="postgresql+asyncpg",
             username=settings.postgres_user,

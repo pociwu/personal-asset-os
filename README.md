@@ -88,6 +88,16 @@ npm test
 npm run build
 ```
 
+## 統一品質閘門
+
+安裝 Python 3.12、`uv`、Node.js 24及npm後，從Repository根目錄執行：
+
+```bash
+python scripts/verify/quality.py
+```
+
+此唯一入口會以鎖檔同步Backend與Frontend依賴，依序執行Ruff lint／format、mypy strict、pytest、ESLint、Prettier、TypeScript、Vitest及production build。任一步驟失敗即以非零狀態停止；GitHub Actions整合留在P0-008。
+
 ## 公開 Repository 安全
 
 禁止提交 `.env`、secret file、資料庫 dump、真實帳戶／持股、OCI OCID、Tailscale 識別資訊、正式 Log、audit log、Playwright trace或含真實資料的截圖。安全問題請依 [SECURITY.md](SECURITY.md) 私下通報。

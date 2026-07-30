@@ -34,9 +34,7 @@ def load_secret_file(
     try:
         raw_value = path.read_text(encoding="utf-8")
     except (OSError, UnicodeError):
-        raise SecretConfigurationError(
-            f"{name} secret file is unavailable"
-        ) from None
+        raise SecretConfigurationError(f"{name} secret file is unavailable") from None
 
     if raw_value.endswith("\r\n"):
         value = raw_value[:-2]

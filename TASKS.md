@@ -33,7 +33,7 @@
 | P0-003 | IN_REVIEW | PostgreSQL、Redis、Compose及 readiness | P0-002 |
 | P0-004 | IN_REVIEW | React build stage與單一 Nginx Web 映像 | P0-003 |
 | P0-005 | IN_REVIEW | Secrets與正式設定邊界 | P0-003 |
-| P0-006 | BACKLOG | 品質與測試指令 | P0-002、P0-004 |
+| P0-006 | IN_REVIEW | 品質與測試指令 | P0-002、P0-004 |
 | P0-007 | BACKLOG | 手動備份、加密、驗證與隔離還原 | P0-003、P0-005 |
 | P0-008 | BACKLOG | GitHub CI與安全掃描 | P0-006 |
 | P0-009 | BACKLOG | OCI帳號、Tailscale與受限 wrapper | P0-005、P0-007、P0-008 |
@@ -90,6 +90,20 @@
   - Secret preflight Shell語法檢查：成功
   - 直接密碼environment掃描：無結果
   - Docker secrets實際掛載：本機未安裝 Docker，待具備 Docker的驗收環境執行
+- Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
+
+### P0-006 候選證據
+
+- Branch：`codex/p0-006-quality-gate`
+- Base：P0-005堆疊候選；上游通過驗收前不得獨立合併至`main`。
+- Includes：Backend Ruff／format／mypy strict／pytest、Frontend ESLint／Prettier／TypeScript／Vitest／build，以及跨Windows／Ubuntu的單一`quality.py`驗收入口。
+- Excludes：Git hook、GitHub Actions、Docker integration、Playwright E2E、安全掃描及OCI ARM64驗收。
+- Verification：
+  - `python scripts/verify/quality.py`：11/11 checks passed
+  - Backend：Ruff通過、17 files格式通過、mypy 17 files無錯誤、20 tests passed
+  - Frontend：ESLint、Prettier、TypeScript通過、2 tests passed、production build成功
+  - `uv.lock`與`package-lock.json`：同步成功
+  - npm audit：0 vulnerabilities
 - Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP
