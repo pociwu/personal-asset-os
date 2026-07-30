@@ -29,8 +29,8 @@
 
 | Task ID | 狀態 | 任務 | 依賴 |
 |---|---|---|---|
-| P0-002 | IN_REVIEW | Backend 最小骨架與 liveness | P0-001 |
-| P0-003 | BACKLOG | PostgreSQL、Redis、Compose及 readiness | P0-002 |
+| P0-002 | DONE | Backend 最小骨架與 liveness | P0-001 |
+| P0-003 | IN_REVIEW | PostgreSQL、Redis、Compose及 readiness | P0-002 |
 | P0-004 | BACKLOG | React build stage與單一 Nginx Web 映像 | P0-003 |
 | P0-005 | BACKLOG | Secrets與正式設定邊界 | P0-003 |
 | P0-006 | BACKLOG | 品質與測試指令 | P0-002、P0-004 |
@@ -48,6 +48,18 @@
   - `uv sync --locked`：成功
   - `uv run --locked pytest`：候選提交前重新執行
   - Uvicorn HTTP smoke：`200`、`{"status":"ok","service":"backend"}`、有效 `X-Request-ID`、`Cache-Control: no-store`
+- Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
+
+### P0-003 候選證據
+
+- Branch：`codex/p0-003-compose-readiness`
+- Includes：Backend容器映像、PostgreSQL 16、Redis 7、內部 Compose network、PostgreSQL named volume、依賴健康檢查及`GET /api/v1/health/ready`。
+- Excludes：Web/Nginx、正式 secret files、migration revision、備份、OCI ARM64實機驗收及財務領域功能。
+- Verification：
+  - `uv lock`與`uv sync --locked`：成功
+  - `uv run --locked pytest`：9 passed
+  - Python compile與 Compose靜態斷言：成功
+  - Docker Compose啟動與故障恢復：本機未安裝 Docker，待具備 Docker的驗收環境執行
 - Commit SHA：候選 commit建立後以 Git metadata及 Issue留言為準
 
 ## NEXT：Phase 1 Mock 持股 MVP
