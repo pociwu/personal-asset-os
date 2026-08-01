@@ -7,6 +7,20 @@
 `BACKLOG → READY → IN_PROGRESS → IN_REVIEW → VERIFIED → DONE`  
 例外：`BLOCKED`、`CANCELLED`
 
+## CURRENT：Usable Alpha其他資產與收入
+
+### A-002 黃金、保單、薪資端到端切片
+
+- Status：`IN_REVIEW`
+- Branch：`codex/alpha-other-assets-income`
+- Purpose：以單一「其他資產與收入」入口完成手動黃金、保單及薪資記錄，並原子連動銀行現金。
+- Includes：規格與領域語言、migration、Backend API與領域計算、臺銀／櫃買中心金價降級、三分頁UI、單元及契約測試。
+- Excludes：截圖辨識、外部AI、Email、LINE、手機推播、自動網銀操作、保單損益。
+- Acceptance：依`docs/governance/SYSTEM_SPEC.md`第15.6節。
+- Dependency：Alpha股票與現金規則決策`c7b9723`。
+- Candidate verification：Backend Ruff、format、mypy通過，45 tests passed；Frontend ESLint、Prettier、TypeScript、2 tests及production build通過；Alembic離線upgrade SQL成功；程式實際取得櫃買中心`AU9901`報價並換算每公克。
+- Pending evidence：本機無Docker，PostgreSQL migration實跑、Compose整合、原生OCI ARM64及Owner登入安全驗收仍待Ubuntu／OCI環境執行；未完成前不得標示`VERIFIED`或部署正式資料。
+
 ## CURRENT：Phase 0 專案骨架與部署底座
 
 ### P0-001 治理文件與公開 Repository 基線

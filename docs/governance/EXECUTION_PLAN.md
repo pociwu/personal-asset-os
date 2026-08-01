@@ -148,3 +148,14 @@ Backend不得在啟動時自動 migration。
 - 自動刪除正式 volume、未驗證備份或執行廣泛 prune
 - 測試失敗時宣稱完成
 - 未備份及未批准即執行正式 migration
+
+## 10. Usable Alpha快速路徑
+
+Owner已決定以最少操作儘早上線；下列任務可在不改變四服務Compose邊界下，優先於原始Phase編號執行：
+
+1. `A-001`：凍結股票、銀行、黃金、保單與薪資的Alpha規格及領域語言。
+2. `A-002`：建立銀行現金、黃金、保單、薪資、金價快取及追加式更正migration與Backend服務。
+3. `A-003`：建立「其他資產與收入」三分頁、首頁摘要及手動輸入流程。
+4. `A-004`：執行PostgreSQL整合、前端、Compose及OCI ARM64 Alpha Gate。
+
+快速路徑不得省略Owner登入、安全邊界、備份、顯式migration、Decimal、audit或ARM64驗收。金價更新由既有Backend按需執行，不新增Worker或Scheduler容器。

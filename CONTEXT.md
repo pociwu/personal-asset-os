@@ -196,6 +196,46 @@ _Avoid_: Gross Dividend、Estimated Deposit
 帳務起始日以來的未實現損益、已實現損益及現金股利淨額合計。
 _Avoid_: Realized Profit、Market Value
 
+**Gold Holding／黃金持有**：
+Owner持有的實體黃金或黃金存摺彙總數量，以公克為共同計算單位並保留原始輸入單位。
+_Avoid_: Stock Holding、Gold Price
+
+**Gold Purity／黃金純度**：
+實體黃金中可按黃金基準價估值的比例；黃金存摺視為完整公克數，不另套純度折減。
+_Avoid_: Recovery Discount、Craftsmanship Fee
+
+**Gold Reference Price／黃金參考價**：
+臺灣銀行新臺幣黃金存摺本行買進價，作為每公克可變現價的首選估值基準；臺銀頁面不可用時，採櫃買中心 AU9901 臺銀金買進報價並由每台錢換算為每公克。兩者都不是Owner實際成交保證價，系統必須保存實際來源。
+_Avoid_: Purchase Price、Guaranteed Recovery Price
+
+**Gold Valuation Override／黃金估值覆寫**：
+Owner依實際回收報價確認、用來取代黃金參考價的每公克估值，必須附估值日期及原因。
+_Avoid_: Gold Reference Price、Silent Price Edit
+
+**Insurance Policy／保單**：
+Owner持有的保險契約及其保費、給付、現金價值與有效狀態；累計保費本身不等於資產。
+_Avoid_: Investment Holding、Premium Asset
+
+**Policy Cash Value／保單現金價值**：
+保單在特定估值日期可列入目前資產的Owner確認金額；不是累計保費，也不代表保證給付。
+_Avoid_: Total Premium、Policy Profit
+
+**Salary Record／薪資紀錄**：
+一次由Owner確認的薪資收入，包含實領金額、入帳銀行及選填的收入與扣除明細。
+_Avoid_: Recurring Transfer、Automatic Payroll
+
+**Salary Template／薪資範本**：
+供下次薪資草稿重複使用的公司、發薪日、預設銀行及選填明細，不會自行產生正式入帳。
+_Avoid_: Confirmed Salary、Scheduled Deposit
+
+**Opening Non-stock Asset／期初非股票資產**：
+帳務起始時已持有的黃金或保單摘要，不追溯建立銀行扣款或虛構歷史交易。
+_Avoid_: Historical Purchase、Backdated Bank Withdrawal
+
+**Valuation Reminder／估值提醒**：
+指出估值資料可能過期但仍保留於資產總額的提示；黃金門檻為30天，保單現金價值門檻為一年。
+_Avoid_: Zero Valuation、Automatic Write-down
+
 **Phase Gate／階段閘門**：  
 某 Phase 所有必要任務完成後執行的整體驗收。  
 _Avoid_: 單一任務測試、Agent自我宣告完成

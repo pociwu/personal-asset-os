@@ -4,7 +4,7 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 
 ## 目前狀態
 
-目前處於 **Phase 0 基礎建設候選實作階段**。Backend、PostgreSQL、Redis、React／Nginx Web、Compose、健康檢查、secret files及加密備份／隔離還原底座已有候選；Ubuntu整合驗收與 OCI ARM64 Phase Gate仍未完成。
+目前處於 **Usable Alpha候選實作階段**。Phase 0基礎設施之上已加入銀行現金、黃金、保單與薪資的手動輸入切片；Ubuntu PostgreSQL整合、Owner登入與 OCI ARM64 Alpha Gate仍未完成，因此尚不可視為正式可用版本。
 
 當前工作狀態見 [TASKS.md](TASKS.md)，系統契約見 [SYSTEM_SPEC.md](docs/governance/SYSTEM_SPEC.md)。
 
@@ -40,8 +40,8 @@ Personal Asset OS 是部署於 OCI ARM64、供單一 Owner 私人使用的資產
 
 - AI-PM 是唯一派工與驗收入口。
 - 一個任務、一個分支、一個語意單一的 commit。
-- Phase 0／1 開發只使用合成資料。
-- Phase 1 使用固定 Mock 行情，不可用於真實財務判斷。
+- 開發與驗收只使用合成資料；正式資料不得進入Git、Log或測試產物。
+- Usable Alpha黃金估值首選臺灣銀行公開本行買進價，受阻時改用櫃買中心官方 `AU9901` 臺銀金買進報價並揭露來源；台股正式行情仍須依Alpha股票規格完成驗收。
 - 不提供自動下單、轉帳或券商密碼保存。
 - 正式部署必須經 Owner 批准並追溯至已驗收 commit SHA。
 
@@ -54,6 +54,20 @@ cd backend
 uv sync --locked
 uv run --locked pytest
 uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+首次啟動或升級前必須由核准部署流程顯式執行migration；Backend不會在啟動時自動建表：
+
+```bash
+cd backend
+uv run --locked alembic upgrade head
+```
+
+Compose候選可在PostgreSQL healthy且部署前備份完成後，以相同Backend映像執行一次性migration：
+
+```bash
+docker compose --env-file .env -f deploy/compose.yaml run --rm backend \
+  uv run --locked alembic -c alembic.ini upgrade head
 ```
 
 Liveness：
