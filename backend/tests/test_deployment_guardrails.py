@@ -79,6 +79,14 @@ def test_candidate_wrapper_has_fixed_inputs_and_never_runs_candidate_scripts() -
     assert "exactly one commit SHA is required" in WRAPPER
     assert "paos-compose-policy.py" in WRAPPER
     assert WRAPPER.index("compose config --format json") < WRAPPER.index("compose up")
+    dependencies_start = WRAPPER.index(
+        "compose up --detach --wait --wait-timeout 120 postgres redis"
+    )
+    migration = WRAPPER.index("alembic -c alembic.ini upgrade head")
+    assert dependencies_start < migration
+    assert WRAPPER.index("alembic -c alembic.ini upgrade head") < WRAPPER.index(
+        "compose up --detach --wait --wait-timeout 240"
+    )
     assert "$WORKTREE/scripts/" not in WRAPPER
     assert "Architecture" in WRAPPER and '"arm64"' in WRAPPER
     assert "/usr/local/sbin/paos-verify-candidate [0-9a-f]*" in SUDOERS

@@ -65,6 +65,15 @@ sudo sysctl --system
 
 正式Repository固定於`/opt/ai-pm-os/projects/personal-asset-os`並由`deploy`擁有。Secret依[Secret files操作指南](SECRETS.md)建立；備份recipient及目錄依[備份與隔離還原指南](BACKUP_RESTORE.md)建立。
 
+首次建立公開Repository工作副本：
+
+```bash
+sudo install -d -m 0755 -o deploy -g deploy /opt/ai-pm-os/projects
+sudo -u deploy git clone https://github.com/pociwu/personal-asset-os.git \
+  /opt/ai-pm-os/projects/personal-asset-os
+sudo -u deploy git -C /opt/ai-pm-os/projects/personal-asset-os fetch --prune origin
+```
+
 ## 安裝root-owned驗證wrapper
 
 由`admin`在已審閱的P0-009 commit執行：
@@ -78,13 +87,26 @@ sudo install -m 0440 deploy/sudoers/paos-ai-pm /etc/sudoers.d/paos-ai-pm
 sudo scripts/deploy/ubuntu-preflight.sh
 ```
 
-Wrapper只接受一個完整小寫commit SHA，且SHA必須可由`origin`遠端分支到達。它使用固定Repository、合成secret、`127.0.0.1:18080`、獨立Compose project及測試volume；先拒絕host mount、額外服務、公開Port、privileged／host namespace及secret路徑逃逸，再執行原生ARM64 build、health、故障及恢復驗證。清理只刪除該SHA的測試project、volume、映像與worktree。
+Wrapper只接受一個完整小寫commit SHA，且SHA必須可由`origin`遠端分支到達。它使用固定Repository、合成secret、`127.0.0.1:18080`、獨立Compose project及測試volume；先拒絕host mount、額外服務、公開Port、privileged／host namespace及secret路徑逃逸，再依序執行原生ARM64 build、啟動PostgreSQL／Redis、一次性Alembic migration、啟動Web／Backend、health、故障及恢復驗證。清理只刪除該SHA的測試project、volume、映像與worktree。
 
 AI-PM可執行：
 
 ```bash
 sudo /usr/local/sbin/paos-verify-candidate <40-character-commit-sha>
 ```
+
+本次公開候選分支可由`ai-pm`解析為完整SHA後送入wrapper：
+
+```bash
+REPOSITORY=/opt/ai-pm-os/projects/personal-asset-os
+sudo -u deploy git -C "$REPOSITORY" fetch --prune origin
+CANDIDATE_SHA="$(sudo -u deploy git -C "$REPOSITORY" \
+  rev-parse origin/codex/alpha-other-assets-income)"
+printf '%s\n' "$CANDIDATE_SHA"
+sudo /usr/local/sbin/paos-verify-candidate "$CANDIDATE_SHA"
+```
+
+畫面列印SHA供Owner核對，不會列印secret。候選驗收會使用合成資料並在結束時清除，不會建立長期正式服務。
 
 不能傳入命令、branch、Compose路徑、Port、volume或secret參數。
 

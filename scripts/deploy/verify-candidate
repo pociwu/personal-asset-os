@@ -75,7 +75,11 @@ chmod 0444 "$SECRETS/postgres_password" "$SECRETS/redis_password"
 
 compose config --format json >"$RUN_ROOT/compose.json"
 python3 "$POLICY" --candidate-root "$RUN_ROOT" <"$RUN_ROOT/compose.json"
-compose up --detach --build --wait --wait-timeout 240
+compose build backend web
+compose up --detach --wait --wait-timeout 120 postgres redis
+compose run --rm --no-deps backend \
+    uv run --locked alembic -c alembic.ini upgrade head
+compose up --detach --wait --wait-timeout 240
 
 curl --fail --silent --show-error "http://127.0.0.1:$TEST_PORT/" >/dev/null
 curl --fail --silent --show-error \
