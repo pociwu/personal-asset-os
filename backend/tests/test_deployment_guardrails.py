@@ -82,7 +82,9 @@ def test_candidate_wrapper_has_fixed_inputs_and_never_runs_candidate_scripts() -
     dependencies_start = WRAPPER.index(
         "compose up --detach --wait --wait-timeout 120 postgres redis"
     )
-    migration = WRAPPER.index("alembic -c alembic.ini upgrade head")
+    migration = WRAPPER.index(
+        "compose run --rm --no-deps backend alembic -c alembic.ini upgrade head"
+    )
     assert dependencies_start < migration
     assert WRAPPER.index("alembic -c alembic.ini upgrade head") < WRAPPER.index(
         "compose up --detach --wait --wait-timeout 240"

@@ -41,7 +41,7 @@ def test_integration_covers_health_failure_recovery_and_restore() -> None:
     required_fragments = (
         'wait_for_status "/api/v1/health" "200"',
         'wait_for_status "/api/v1/health/ready" "503"',
-        "alembic -c alembic.ini upgrade head",
+        "compose run --rm --no-deps backend alembic -c alembic.ini upgrade head",
         "compose stop postgres",
         "compose start postgres",
         "scripts/backup/create-backup.sh",

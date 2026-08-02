@@ -85,8 +85,7 @@ export PAOS_IMAGE_TAG="candidate"
 compose config --quiet
 compose build backend web
 compose up --detach --wait --wait-timeout 120 postgres redis
-compose run --rm --no-deps backend \
-    uv run --locked alembic -c alembic.ini upgrade head
+compose run --rm --no-deps backend alembic -c alembic.ini upgrade head
 compose up --detach --wait --wait-timeout 180
 
 wait_for_status "/" "200"

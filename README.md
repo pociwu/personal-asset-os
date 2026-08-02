@@ -67,7 +67,7 @@ Compose候選可在PostgreSQL healthy且部署前備份完成後，以相同Back
 
 ```bash
 docker compose --env-file .env -f deploy/compose.yaml run --rm backend \
-  uv run --locked alembic -c alembic.ini upgrade head
+  alembic -c alembic.ini upgrade head
 ```
 
 Liveness：
